@@ -14,7 +14,10 @@
 }*/
 void UART1_init(void){
 	//SCON1: UART1 Control Register
-	SCON1=0x70;
+	T4CON&=~0x30;
+	PCON |= 0x10;
+	PCON&=~0x08;
+	SCON1=0x72;
 }
 
 char UART1_putchar (char c,char csg_tempo){
@@ -38,5 +41,11 @@ char UART1_putchar (char c,char csg_tempo){
 }
 
 char UART1_getchar (void){
-	return 0;
+    char c;
+    if ((SCON1&0x01)==0)
+        return 0;
+       
+    c=SBUF1;
+    SCON1&=~0x01;
+    return c;
 }
