@@ -19,7 +19,7 @@ void UART1_init(void){
 
 char UART1_putchar (char c,char csg_tempo){
 	int i=0;
-	while(TI1==0)
+	while((SCON1&0x02)==0)
 	{
 		for(i=0;i<1000;i++)
 		{
@@ -33,7 +33,7 @@ char UART1_putchar (char c,char csg_tempo){
 		}
 	}
 	SBUF1=c;
-	TI1=0;
+	SCON1&=~0x02;
 	return c;
 }
 
