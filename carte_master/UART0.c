@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <intrins.h>
 #include "UART0.h"
+
+
 #ifndef SYSCLK
 #define SYSCLK 22118400 
 #endif
@@ -60,4 +62,63 @@ char UART0_getchar (void)
     c=SBUF0;
     RI0=0;
     return c;
+}
+
+void UART0_print(char* str){
+	int i=0;
+	char c=0;
+	while(str[i]!=0){
+		c=0;
+		while(c==0){
+			c=UART0_putchar(str[i],2);
+		}
+		++i;
+	}
+}
+
+void UART0_scan(char* str){
+	int i=0;
+	char c=5;
+	//UART0_putchar('l',2);
+	while(c!=0){
+		c=0;
+		while(c==0){
+			c=UART0_getchar();
+			//UART0_putchar('x',2);
+		}
+		//UART0_putchar('a',2);
+		if(c==13||c==10){
+			c=0;
+		}
+		str[i]=c;
+		++i;
+	}
+}
+
+void itoa(int n, char *s) { 
+	char i;
+	int n1;
+	if (n<0) {
+		n=-n;
+		*s++='-';
+		}
+	do
+	{
+		n1=n;
+		i=0;
+	while (1) {
+		if (n1<=9)   {
+			*s++=n1+'0';
+			break;
+		}
+		n1=n1/10;
+		i++;
+	}
+	while (i) {
+		i--;
+		n1=n1*10;
+	}
+	n-=n1;
+	}while (n);
+	*s++=0;
 }
