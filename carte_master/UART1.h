@@ -6,4 +6,6 @@
 void UART1_init(void);
 char UART1_putchar (char c,char csg_tempo);
 char UART1_getchar (void);
+char UART1_print(char* str );
+char UART1_scan(char* str);
 #endif

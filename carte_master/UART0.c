@@ -9,6 +9,11 @@
 #endif
 #define UART0_BAUDRATE 11500
 
+#include "io_buffer.h"
+
+IO_buffer inb={"",0};
+IO_buffer oub={"",0};
+
 void UART0_clock_init(void){
     CKCON |= 0x10; // Timer1 uses SYSCLK as time base
     TMOD = 0x20; // TMOD: timer 1, mode 2, 8-bit reload
@@ -20,11 +25,45 @@ void UART0_clock_init(void){
 }
 
 void UART0_registers_init(void){
+		ES0=1;//enable uart0 interrupt
     RCLK0 = 0; //T2CON source CLK timer1
     TCLK0 = 0; //T2CON
     PCON |= 0x80; //SMOD0
     PCON &= 0xBF; //SSTAT0=0
     SCON0 = 0x72; //mode 1 : check stop bit - reception validée
+}
+
+
+void ISR_UART0(void) interrupt 4{
+	char c=0;
+	if(TI0){
+		if(oub.indice!=BUFFER_SIZE+1){
+			UART0_putchar(oub.buffer[oub.indice],2);
+			if(oub.buffer[oub.indice]==0||oub.indice==(BUFFER_SIZE-1)){
+				oub.indice=BUFFER_SIZE+1;
+			}
+			else{
+				++oub.indice;
+			}
+		}
+		TI0=0;
+	}
+	else{
+		if(RI0){
+			c=UART0_getchar();
+			if(c!=0){
+				if(c==13||c==10)
+					c=0;
+				if(inb.indice<BUFFER_SIZE){
+					inb.buffer[inb.indice]=c;
+					inb.indice++;
+				}
+				if(c==0||inb.indice==BUFFER_SIZE)
+					inb.indice=BUFFER_SIZE+1;
+			}
+		}
+	  RI0=0;
+	}
 }
 
 void UART0_init(void){
@@ -58,41 +97,50 @@ char UART0_getchar (void)
     char c;
     if (RI0==0)
         return 0;
-       
     c=SBUF0;
     RI0=0;
     return c;
 }
 
-void UART0_print(char* str){
-	int i=0;
-	char c=0;
-	while(str[i]!=0){
-		c=0;
-		while(c==0){
-			c=UART0_putchar(str[i],2);
-		}
-		++i;
+char UART0_print(char* str){
+	char i=0;
+	char c=5;
+	if(oub.indice!=BUFFER_SIZE+1)
+		return 0;
+	while(str[i]!=0)
+		i++;
+	if(i>=BUFFER_SIZE)
+		return 0;
+	i=0;
+	oub.indice=0;
+	while(c!=0){
+		c=str[i];
+		oub.buffer[i]=c;
+		i++;
 	}
+	return 1;
 }
 
-void UART0_scan(char* str){
-	int i=0;
+char UART0_scan(char* str){
 	char c=5;
-	//UART0_putchar('l',2);
-	while(c!=0){
-		c=0;
-		while(c==0){
-			c=UART0_getchar();
-			//UART0_putchar('x',2);
-		}
-		//UART0_putchar('a',2);
-		if(c==13||c==10){
-			c=0;
-		}
-		str[i]=c;
-		++i;
+	char i=0;
+	if(inb.indice!=BUFFER_SIZE+1){
+		str[0]=0;
+		return 0;
 	}
+	while(c!=0&&i<BUFFER_SIZE){
+		c=inb.buffer[i];
+		str[i]=c;
+		inb.buffer[i]=5;
+		i++;
+	}
+	if(c!=0){
+		str[0]=0;
+		inb.indice=0;
+		return 0;
+	}
+	inb.indice=0;
+	return 1;
 }
 
 void itoa(int n, char *s) { 
