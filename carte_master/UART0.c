@@ -38,7 +38,7 @@ void ISR_UART0(void) interrupt 4{
 	char c=0;
 	if(TI0){
 		if(oub.indice!=BUFFER_SIZE+1){
-			UART0_putchar(oub.buffer[oub.indice],2);
+			SBUF0=oub.buffer[oub.indice];
 			if(oub.buffer[oub.indice]==0||oub.indice==(BUFFER_SIZE-1)){
 				oub.indice=BUFFER_SIZE+1;
 			}
@@ -50,7 +50,7 @@ void ISR_UART0(void) interrupt 4{
 	}
 	else{
 		if(RI0){
-			c=UART0_getchar();
+			c=SBUF0;
 			if(c!=0){
 				if(c==13||c==10)
 					c=0;
@@ -61,45 +61,14 @@ void ISR_UART0(void) interrupt 4{
 				if(c==0||inb.indice==BUFFER_SIZE)
 					inb.indice=BUFFER_SIZE+1;
 			}
+			RI0=0;
 		}
-	  RI0=0;
 	}
 }
 
 void UART0_init(void){
 	UART0_clock_init();
 	UART0_registers_init();
-}
-
-char UART0_putchar (char c,char csg_tempo)
-{
-	int i=0;
-	while(TI0==0)
-	{
-		for(i=0;i<1000;i++)
-		{
-			_nop_ ();
-		}
-		
-		csg_tempo=csg_tempo-1;
-		if(csg_tempo==0)
-		{
-			return 0;
-		}
-	}
-	SBUF0=c;
-	TI0=0;
-	return c;
-}
-
-char UART0_getchar (void)
-{
-    char c;
-    if (RI0==0)
-        return 0;
-    c=SBUF0;
-    RI0=0;
-    return c;
 }
 
 char UART0_print(char* str){
