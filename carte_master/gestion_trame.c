@@ -8,6 +8,32 @@
 #include "F0_M3.h"
 #include "gestion_trame.h"
 
+/**********************************************
+ * Initialisation de la structure de commande *
+ **********************************************/
+
+void commande_init(OUT_M1* out_M1) {
+
+	out_M1->Etat_Epreuve = Epreuve_non;
+	out_M1->Etat_Mouvement = Mouvement_non;
+	out_M1->Vitesse = 0 ;
+	out_M1->Coord_X = 0;
+	out_M1->Coord_Y = 0;
+	out_M1->Angle = 0;
+	out_M1->Etat_ACQ_Son = ACQ_non;
+	out_M1->ACQ_Duree = 0 ;
+	out_M1->Etat_DCT_Obst = DCT_non;
+	out_M1->Etat_Lumiere = Lumiere_non;
+	out_M1->Lumiere_Intensite = 0;
+	out_M1->Lumiere_Duree = 0;
+	out_M1->Lumiere_Extinction = 0;
+	out_M1->Lumiere_Nbre = 0;
+	out_M1->Etat_Servo = Servo_non;
+	out_M1->Servo_Angle=0;
+
+}
+
+
 /**********************
  * Analyse du message *
  **********************/
