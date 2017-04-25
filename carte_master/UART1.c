@@ -6,7 +6,7 @@
 #ifndef SYSCLK
 #define SYSCLK 22118400 
 #endif
-#define UART1_BAUDRATE 11500
+#define UART1_BAUDRATE 19200
 
 #include "io_buffer.h"
 
@@ -63,7 +63,7 @@ char UART1_print(char* str){
 		return 0;
 	while(str[i]!=0)
 		i++;
-	if(i>=BUFFER_SIZE)
+	if(i>=BUFFER_SIZE-1)
 		return 0;
 	i=0;
 	outb_UART1.indice=0;
