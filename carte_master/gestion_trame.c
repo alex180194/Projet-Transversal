@@ -8,12 +8,14 @@
 #include "F0_M3.h"
 #include "gestion_trame.h"
 
+
 /**********************
  * Analyse du message *
  **********************/
 
-char xdata trame[20]="";
 
+OUT_M1 xdata out_M1;
+char xdata trame[20]="";
 
 void gestion_trame() {
 	char c=0;
@@ -22,12 +24,9 @@ void gestion_trame() {
 	
 	switch(trame[0]) {
 
-//		case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
-//			while(c==0) {
-//				c=UART0_print("debut epreuve");
-//			}
-//			c=0;
-//			break;
+		case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
+			out_M1.Etat_Epreuve=decodeur_type_epreuve(&trame[2]);
+			break;
 
 //		case 'E' : /********** E - Fin de l'épreuve **********/
 //			while(c==0) {
@@ -309,3 +308,36 @@ void gestion_trame() {
 		trame[c]=0;
 }
 
+
+enum Epreuve decodeur_type_epreuve(char* str){
+	char c= atoi(str);
+	switch(c){
+		case 0:
+			return Epreuve_non;
+		break;
+		case 1:
+			return epreuve1;
+		break;
+		case 2:
+			return epreuve2;
+		break;
+		case 3:
+			return epreuve3;
+		break;
+		case 4:
+			return epreuve4;
+		break;
+		case 5:
+			return epreuve5;
+		break;
+		case 6:
+			return epreuve6;
+		break;
+		case 7:
+			return epreuve7;
+		break;
+		case 8:
+			return epreuve8;
+		break;
+	}
+}
