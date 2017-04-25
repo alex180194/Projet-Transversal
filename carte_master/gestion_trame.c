@@ -8,6 +8,16 @@
 #include "F0_M3.h"
 #include "gestion_trame.h"
 
+OUT_M1 xdata out_M1;
+char xdata trame[20]="";
+
+void gestion_trame_init(){
+	char c;
+	commande_init(&out_M1);
+	for(c=0;c<20;c++)
+		trame[c]=0;
+}
+
 /**********************************************
  * Initialisation de la structure de commande *
  **********************************************/
@@ -38,9 +48,6 @@ void commande_init(OUT_M1* out_M1) {
  **********************/
 
 
-OUT_M1 xdata out_M1;
-char xdata trame[20]="";
-
 void gestion_trame() {
 	char c=0;
 	char commande_geree=0;
@@ -50,42 +57,32 @@ void gestion_trame() {
 
 		case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
 			out_M1.Etat_Epreuve=decodeur_type_epreuve(&trame[2]);
+			commande_geree=1;
 			break;
 
-//		case 'E' : /********** E - Fin de l'épreuve **********/
-//			while(c==0) {
-//				c=UART0_print("fin epreuve");
-//			}
-//			c=0;
-//			break;
+		case 'E' : /********** E - Fin de l'épreuve **********/
+			out_M1.Etat_Epreuve=Fin_Epreuve;
+			commande_geree=1;
+			break;
 
-//		case 'Q' : /********** Q - Arrêt d'urgence **********/
-//			while(c==0) {
-//				c=UART0_print("arret urgence");
-//			}
-//			c=0;
-//			break;
+		case 'Q' : /********** Q - Arrêt d'urgence **********/
+			out_M1.Etat_Epreuve=Stop_Urgence;
+			commande_geree=1;
+			break;
 
-//		case 'T' : /********** TV vitesse - Réglage vitesse de déplacement **********/
-//			while(c==0) {
-//				c=UART0_print("vitesse deplacement");
-//			}
-//			c=0;
-//			while(c==0) {
-//				c=UART0_print(&trame[3]);
-//			}
-//			c=0;
-//			break;
+		case 'T' : /********** TV vitesse - Réglage vitesse de déplacement **********/
+			out_M1.Vitesse=atoi(&trame[3]);
+			commande_geree=1;
+			break;
 
-//		case 'A' :
-//			switch(trame[1]) {
-//				case ' ' : /********** A [vitesse] - Avancer **********/
-//					sprintf(reponse,"avancer");
-//					while(c==0) {
-//						c=UART0_print(reponse);
-//					}
-//					c=0;
-//					break;
+		case 'A' :
+			switch(trame[1]) {
+				case ' ' : /********** A [vitesse] - Avancer **********/
+					out_M1.Etat_Mouvement=Avancer;
+					if(trame[2]!=0)
+						out_M1.Vitesse=atoi(&trame[2]);
+					commande_geree=1;
+					break;
 //				case 'U' : /********** AUX [] - Commandes auxiliaires **********/
 //					while(c==0) {
 //						c=UART0_print("Commandes aux");
@@ -100,7 +97,8 @@ void gestion_trame() {
 //							}
 //							c=0;
 //							break;
-//					}
+					}
+				break;
 					/*switch(trame[3]) { /********** AS [H/V] - Servomoteur positionné **********
 						case 'H' :
 							while(c==0) {
@@ -117,29 +115,19 @@ void gestion_trame() {
 					}*/
 //			}
 
-//		case 'B' : /********** B [vitesse] - Reculer **********/
-//			while(c==0) {
-//				c=UART0_print("reculer");
-//			}
-//			c=0;
-//			break;	
-			/*switch(trame[2]) {
-				case ' ' : /********** B - Arrivée au point spécifique **********
-					while(c==0) {
-						c=UART0_print("Arrivée au pt spé");
-					}
-					c=0;
-					break;
-			}*/
+		case 'B' : /********** B [vitesse] - Reculer **********/
+			out_M1.Etat_Mouvement=Reculer;
+					if(trame[2]!=0)
+						out_M1.Vitesse=atoi(&trame[2]);
+					commande_geree=1;
+			break;
 
-//		case 'S' :
-//			switch(trame[1]) {
-//				case ' ' : /********** S - STOP - Fin des commandes de déplacement A et B de la base roulante **********/
-//					while(c==0) {
-//						c=UART0_print("stop");
-//					}
-//					c=0;
-//					break;
+		case 'S' :
+			switch(trame[1]) {
+				case ' ' : /********** S - STOP - Fin des commandes de déplacement A et B de la base roulante **********/
+					out_M1.Etat_Mouvement=Stopper;
+					commande_geree=1;
+					break;
 //				case 'D' : /********** SD [F:code_fréquence] [P:durée_son] [W:durée_silence] [B:nombre_bips] - Génération de signaux sonores **********/
 //					while(c==0) {
 //						c=UART0_print("Géné signaux sonores");
@@ -152,45 +140,37 @@ void gestion_trame() {
 //					}
 //					c=0;
 //					break;
-//			}
+			}
+		break;
 
-//		case 'R' : /********** Rotations **********/
-//			switch(trame[1]) {
-//				case 'D' : /********** RD - Rotation à droite de 90° **********/
-//					while(c==0) {
-//						c=UART0_print("Rotation 90° droite");
-//					}
-//					c=0;
-//					break;
-//				case 'G' : /********** RG - Rotation à gauche de 90° **********/
-//					while(c==0) {
-//						c=UART0_print("Rotation 90° gauche");
-//					}
-//					c=0;
-//					break;
+		case 'R' : /********** Rotations **********/
+			switch(trame[1]) {
+				case 'D' : /********** RD - Rotation à droite de 90° **********/
+					out_M1.Etat_Mouvement=Rot_90D;
+					commande_geree=1;
+					break;
+				case 'G' : /********** RG - Rotation à gauche de 90° **********/
+					out_M1.Etat_Mouvement=Rot_90G;
+					commande_geree=1;
+					break;
 //				case 'A' : /********** RA sens:valeur - Rotation de la base roulante d'un angle donné **********/
-//					while(c==0) {
-//						c=UART0_print("Rotation angle donné");
-//					}
-//					c=0;
+//					out_M1.Angle=0;
+//					commande_geree=1;
 //					break;
-//				case 'C' : /********** RC [D/G] - Rotation complète de la base roulante de 180° **********/
-//					switch(trame[3]) {
-//						case 'D' :
-//							while(c==0) {
-//								c=UART0_print("Rotation 180° droite");
-//							}
-//							c=0;
-//							break;
-//						case 'G' :
-//							while(c==0) {
-//								c=UART0_print("Rotation 180° gauche");
-//							}
-//							c=0;
-//							break;
-//					}
-//			}
-//			break;
+				case 'C' : /********** RC [D/G] - Rotation complète de la base roulante de 180° **********/
+					switch(trame[3]) {
+						case 'D' :
+							out_M1.Etat_Mouvement=Rot_180D;
+							commande_geree=1;
+							break;
+						case 'G' :
+							out_M1.Etat_Mouvement=Rot_180G;
+							commande_geree=1;
+							break;
+					}
+					break;
+			}
+			break;
 
 //		case 'G' : /********** G X:valeur_x Y:valeur_y A:angle - Déplacement de la base roulante par coordonnées **********/
 //			while(c==0) {
@@ -291,19 +271,23 @@ void gestion_trame() {
 
 		case 'C' : /********** CS [H/V] [A:Angle] - Pilotage du servomoteur **********/
 			switch(trame[3]) {
-//				case 'H' : /********** Pilotage du servomoteur horizontal **********/
-//					while(c==0) {
-//						c=UART0_print("Pilotage servoH");
-//					}
-//					c=0;
-//					c=atoi(&trame[4]);
-//					CDE_servo_Horizontal (c);
-//					break;
-				case 'V' : /********** Pilotage du servomoteur vertical **********/
-					while(c==0) {
-						c=UART0_print("Pilotage servoV");
-					}
+				case 'H' : /********** Pilotage du servomoteur horizontal **********/
+					out_M1.Etat_Servo=Servo_H;
+					if(trame[5]!=0)
+						out_M1.Servo_Angle=atoi(&trame[5]);
 					commande_geree=1;
+					break;
+				case 'V' : /********** Pilotage du servomoteur vertical **********/
+					out_M1.Etat_Servo=Servo_V;
+					if(trame[5]!=0)
+						out_M1.Servo_Angle=atoi(&trame[5]);
+					commande_geree=1;
+					break;
+					default:
+						if(trame[3]!=0){
+							out_M1.Servo_Angle=atoi(&trame[3]);
+							commande_geree=1;
+						}
 					break;
 			}
 			
@@ -332,6 +316,9 @@ void gestion_trame() {
 		trame[c]=0;
 }
 
+void switch_trame(void){
+	
+}
 
 enum Epreuve decodeur_type_epreuve(char* str){
 	char c= atoi(str);
@@ -362,6 +349,9 @@ enum Epreuve decodeur_type_epreuve(char* str){
 		break;
 		case 8:
 			return epreuve8;
+		break;
+		default:
+			return Epreuve_non;
 		break;
 	}
 }
