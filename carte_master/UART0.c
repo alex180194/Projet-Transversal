@@ -11,8 +11,8 @@
 
 #include "io_buffer.h"
 
-IO_buffer xdata inb={"",0};
-IO_buffer_circulaire xdata oub;
+IO_buffer xdata out_buf,in_buf;
+char c=0;
 
 void UART0_clock_init(void){
     CKCON |= 0x10; // Timer1 uses SYSCLK as time base
@@ -37,24 +37,16 @@ void UART0_registers_init(void){
 void ISR_UART0(void) interrupt 4{
 	char c=0;
 	if(TI0){
-		//if(!iobc_is_empty(oub)){
-			SBUF0=iobc_get_char(&oub);
-		//}
+		c=io_buffer_pop_front(&out_buf);
+		SBUF0=c;
 		TI0=0;
 	}
 	else{
 		if(RI0){
 			c=SBUF0;
-			if(c!=0){
-				if(c==13||c==10)
-					c=0;
-				if(inb.indice<BUFFER_SIZE){
-					inb.buffer[inb.indice]=c;
-					inb.indice++;
-				}
-				if(c==0||inb.indice==BUFFER_SIZE)
-					inb.indice=BUFFER_SIZE+1;
-			}
+			if(c=='\r'||c=='\n')
+				c=0;
+      io_buffer_push_back(&in_buf,c);
 			RI0=0;
 		}
 	}
@@ -63,31 +55,14 @@ void ISR_UART0(void) interrupt 4{
 void UART0_init(void){
 	UART0_clock_init();
 	UART0_registers_init();
-	iobc_init(&oub,20);
+	io_buffer_init(&out_buf);
+	io_buffer_init(&in_buf);
 }
 
 char UART0_print(char* str){
-	return iobc_print(&oub,str);
+	return io_buffer_print(&out_buf,str);
 }
 
 char UART0_scan(char* str){
-	char c=5;
-	char i=0;
-	if(inb.indice!=BUFFER_SIZE+1){
-		str[0]=0;
-		return 0;
-	}
-	while(c!=0&&i<BUFFER_SIZE){
-		c=inb.buffer[i];
-		str[i]=c;
-		inb.buffer[i]=5;
-		i++;
-	}
-	if(c!=0){
-		str[0]=0;
-		inb.indice=0;
-		return 0;
-	}
-	inb.indice=0;
-	return 1;
+	return io_buffer_scan(&in_buf,str);
 }
