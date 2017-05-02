@@ -81,7 +81,6 @@ void gestion_trame() {
 					out_M1.Etat_Mouvement=Avancer;
 					if(trame[2]!=0)
 						out_M1.Vitesse=atoi(&trame[2]);
-					commande_geree=1;
 					break;
 //				case 'U' : /********** AUX [] - Commandes auxiliaires **********/
 //					while(c==0) {
@@ -98,6 +97,7 @@ void gestion_trame() {
 //							c=0;
 //							break;
 					}
+				commande_geree=1;
 				break;
 					/*switch(trame[3]) { /********** AS [H/V] - Servomoteur positionné **********
 						case 'H' :
@@ -305,11 +305,11 @@ void gestion_trame() {
 				c=0;
 	if(commande_geree==0){
 		while(c==0)
-				c=UART0_print("\t\n#");
+				c=UART0_print("\r\n#");
 }
 	else{
 		while(c==0&&trame[0]!=0)
-					c=UART0_print("\t\n>");
+					c=UART0_print("\r\n>");
 	}
 			
 	for(c=0;c<20;c++)
