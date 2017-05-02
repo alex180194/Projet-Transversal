@@ -8,5 +8,6 @@ void gestion_trame_init();
 void commande_init(OUT_M1* out_M1);
 void gestion_trame();
 enum Epreuve decodeur_type_epreuve(char* str);
+char switch_trame(void);
 
 #endif

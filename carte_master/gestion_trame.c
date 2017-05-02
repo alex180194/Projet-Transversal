@@ -51,11 +51,27 @@ void commande_init(OUT_M1* out_M1) {
 void gestion_trame() {
 	char c=0;
 	char commande_geree=0;
-	UART0_scan(trame);
-	
-	switch(trame[0]) {
+	c=UART0_scan(trame);
+	if(c==1){
+		commande_geree=switch_trame();
+					c=0;
+		if(commande_geree==0){
+					UART0_print("\r\n#");
+	}
+		else{
+			if(trame[0]!=0)
+						c=UART0_print("\r\n>");
+		}
+				
+		for(c=0;c<20;c++)
+			trame[c]=0;
+	}
+}
 
-		case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
+char switch_trame(void){
+	char commande_geree=0;
+	switch(trame[0]) {
+			case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
 			out_M1.Etat_Epreuve=decodeur_type_epreuve(&trame[2]);
 			commande_geree=1;
 			break;
@@ -97,7 +113,7 @@ void gestion_trame() {
 //							c=0;
 //							break;
 					}
-				commande_geree=1;
+					commande_geree=1;
 				break;
 					/*switch(trame[3]) { /********** AS [H/V] - Servomoteur positionné **********
 						case 'H' :
@@ -290,34 +306,13 @@ void gestion_trame() {
 						}
 					break;
 			}
-			
-
-		case 0 :
-			while(c==0) {
-				c=UART0_print("");
-			}
 			commande_geree=1;
 			break;
 			default:
 			commande_geree=0;
 			break;
 		}
-				c=0;
-	if(commande_geree==0){
-		while(c==0)
-				c=UART0_print("\r\n#");
-}
-	else{
-		while(c==0&&trame[0]!=0)
-					c=UART0_print("\r\n>");
-	}
-			
-	for(c=0;c<20;c++)
-		trame[c]=0;
-}
-
-void switch_trame(void){
-	
+		return commande_geree;
 }
 
 enum Epreuve decodeur_type_epreuve(char* str){
