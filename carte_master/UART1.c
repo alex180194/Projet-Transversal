@@ -27,7 +27,7 @@ void UART1_init(void){
 
 void ISR_UART1(void) interrupt 20{
 	if(SCON1&0x02){
-		car=io_buffer_pop_front(&out_buf_UART1);
+		car=io_buffer_pop_front_ISR1(&out_buf_UART1);
 		SBUF1=car;
 		SCON1&=~0x02;
 	}
@@ -36,7 +36,7 @@ void ISR_UART1(void) interrupt 20{
 			car=SBUF0;
 			if(car=='\r'||car=='\n')
 				car=0;
-      io_buffer_push_back(&in_buf_UART1,car);
+      io_buffer_push_back_ISR1(&in_buf_UART1,car);
 	    SCON1&=~0x01;
 		}
 	}

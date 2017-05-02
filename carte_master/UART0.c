@@ -37,7 +37,7 @@ void UART0_registers_init(void){
 void ISR_UART0(void) interrupt 4{
 	char c=0;
 	if(TI0){
-		c=io_buffer_pop_front(&out_buf);
+		c=io_buffer_pop_front_ISR0(&out_buf);
 		SBUF0=c;
 		TI0=0;
 	}
@@ -46,7 +46,7 @@ void ISR_UART0(void) interrupt 4{
 			c=SBUF0;
 			if(c=='\r'||c=='\n')
 				c=0;
-      io_buffer_push_back(&in_buf,c);
+      io_buffer_push_back_ISR0(&in_buf,c);
 			RI0=0;
 		}
 	}

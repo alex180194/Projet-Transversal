@@ -20,7 +20,61 @@ char io_buffer_push_back(IO_buffer* buf,char car){
     return 1;
 }
 
+char io_buffer_push_back_ISR0(IO_buffer* buf,char car){
+    if(buf->nbr_car>=BUFFER_SIZE)
+        return 0;
+    *buf->fin=car;
+    buf->fin++;
+    if(buf->fin>=buf->buffer+BUFFER_SIZE)
+        buf->fin=buf->buffer;
+    buf->nbr_car++;
+    if(car==0)
+        buf->nbr_string++;
+    return 1;
+}
+
+char io_buffer_push_back_ISR1(IO_buffer* buf,char car){
+    if(buf->nbr_car>=BUFFER_SIZE)
+        return 0;
+    *buf->fin=car;
+    buf->fin++;
+    if(buf->fin>=buf->buffer+BUFFER_SIZE)
+        buf->fin=buf->buffer;
+    buf->nbr_car++;
+    if(car==0)
+        buf->nbr_string++;
+    return 1;
+}
+
 char io_buffer_pop_front(IO_buffer* buf){
+    char car;
+    if(buf->nbr_car==0)
+        return 0;
+    car=*buf->debut;
+    buf->debut++;
+    if(buf->debut>=buf->buffer+BUFFER_SIZE)
+        buf->debut=buf->buffer;
+    buf->nbr_car--;
+    if(car==0)
+        buf->nbr_string--;
+    return car;
+}
+
+char io_buffer_pop_front_ISR0(IO_buffer* buf){
+    char car;
+    if(buf->nbr_car==0)
+        return 0;
+    car=*buf->debut;
+    buf->debut++;
+    if(buf->debut>=buf->buffer+BUFFER_SIZE)
+        buf->debut=buf->buffer;
+    buf->nbr_car--;
+    if(car==0)
+        buf->nbr_string--;
+    return car;
+}
+
+char io_buffer_pop_front_ISR1(IO_buffer* buf){
     char car;
     if(buf->nbr_car==0)
         return 0;
