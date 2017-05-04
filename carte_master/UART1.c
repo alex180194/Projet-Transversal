@@ -23,17 +23,22 @@ void UART1_init(void){
 	PCON&=~0x08;
 	SCON1=0x73;
 	EIE2|=0x40;//enable uart1 interrupt
+	
+  io_buffer_init(&out_buf_UART1);
+	io_buffer_init(&in_buf_UART1);
 }
 
 void ISR_UART1(void) interrupt 20{
 	if(SCON1&0x02){
-		car=io_buffer_pop_front_ISR1(&out_buf_UART1);
-		SBUF1=car;
+		if(out_buf_UART1.nbr_car>0){
+			car=io_buffer_pop_front_ISR1(&out_buf_UART1);
+			SBUF1=car;
+		}
 		SCON1&=~0x02;
 	}
 	else{
 		if(SCON1&0x01){
-			car=SBUF0;
+			car=SBUF1;
 			if(car=='\r'||car=='\n')
 				car=0;
       io_buffer_push_back_ISR1(&in_buf_UART1,car);
@@ -43,7 +48,11 @@ void ISR_UART1(void) interrupt 20{
 }
 
 char UART1_print(char* str){
-	return io_buffer_print(&out_buf_UART1,str);
+	char cara=0,nb_cara=out_buf_UART1.nbr_car;
+	cara= io_buffer_print(&out_buf_UART1,str);
+	if(nb_cara==0)
+		SCON1|=0x02;
+	return cara;
 }
 
 char UART1_scan(char* str){

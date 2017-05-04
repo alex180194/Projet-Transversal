@@ -19,7 +19,7 @@ void UART0_clock_init(void){
     TMOD = 0x20; // TMOD: timer 1, mode 2, 8-bit reload
     TMOD &= 0x2F;  // Met tous les autres bits à '0'
     TF1 =0; //flag désactivé
-    TH1 = -(SYSCLK/UART0_BAUDRATE/16); // set Timer1 reload value for baudrate
+    TH1 =184; //-(SYSCLK/UART0_BAUDRATE/16); // set Timer1 reload value for baudrate
     TL1 = TH1; // set Timer1 initial value
     TR1 = 1; // start Timer1
 }
@@ -37,8 +37,10 @@ void UART0_registers_init(void){
 void ISR_UART0(void) interrupt 4{
 	char c=0;
 	if(TI0){
-		c=io_buffer_pop_front_ISR0(&out_buf);
-		SBUF0=c;
+		if(out_buf.nbr_car>0){
+			c=io_buffer_pop_front_ISR0(&out_buf);
+			SBUF0=c;
+		}
 		TI0=0;
 	}
 	else{
@@ -60,7 +62,11 @@ void UART0_init(void){
 }
 
 char UART0_print(char* str){
-	return io_buffer_print(&out_buf,str);
+	char cara=0,nb_cara=out_buf.nbr_car;
+	cara= io_buffer_print(&out_buf,str);
+	if(nb_cara==0)
+		TI0=1;
+	return cara;
 }
 
 char UART0_scan(char* str){
