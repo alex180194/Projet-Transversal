@@ -4,13 +4,13 @@
 #include "gestion_serializer.h"
 #include <stdio.h>
 
-char envoyer_message=0;
 char arret=0;
 char vitesseAbs=0;
 enum Mouvement type_mouvement;
 char xdata message[30];
 
 void gestion_serializer(void){
+	gestion_trame();
 	if(out_M1.Etat_Epreuve>Epreuve_non&&out_M1.Etat_Epreuve<Fin_Epreuve){
 		arret=0;
 		evoi_message();
@@ -47,23 +47,33 @@ void evoi_message(void){
 			UART1_print(message);
 		break;
 		case Rot_90D:
-			UART1_print("digo 1:2500:20 2:-2500:20\r");
-		break;
-		case Rot_90G:
 			UART1_print("digo 1:-2500:20 2:2500:20\r");
 		break;
+		case Rot_90G:
+			UART1_print("digo 1:2500:20 2:-2500:20\r");
+		break;
 		case Rot_180G:
-			UART1_print("digo 1:-5000:20 2:5000:20\r");
+			UART1_print("digo 1:5000:20 2:-5000:20\r");
 		break;
 		case Rot_180D:
-			UART1_print("digo 1:5000:20 2:-5000:20\r");
+			UART1_print("digo 1:-5000:20 2:5000:20\r");
+		break;
+		case Rot_AngD:
+			sprintf(message,"digo 1:%d:20 2:%d:20\r",-angle_to_tick(out_M1.Angle),angle_to_tick(out_M1.Angle));
+			UART1_print(message);
+		break;
+		case Rot_AngG:
+			sprintf(message,"digo 1:%d:20 2:%d:20\r",angle_to_tick(out_M1.Angle),-angle_to_tick(out_M1.Angle));
+			UART1_print(message);
 		break;
 	}
 	if(out_M1.Etat_Mouvement!=Mouvement_non)
 	{
 		type_mouvement=out_M1.Etat_Mouvement;
-		envoyer_message=1;
 	}
 	out_M1.Etat_Mouvement=Mouvement_non;
-	envoyer_message=0;
+}
+
+int angle_to_tick(int angle){
+	return (int)(3.5* (float)angle);
 }

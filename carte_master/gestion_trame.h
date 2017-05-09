@@ -1,6 +1,6 @@
 #ifndef GESTION_TRAME_H
 #define GESTION_TRAME_H
-#include "..\structures_centrale.c"
+#include "structures_centrale.c"
 
 extern OUT_M1 xdata out_M1;
 

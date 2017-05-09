@@ -173,10 +173,23 @@ char switch_trame(void){
 					out_M1.Etat_Mouvement=Rot_90G;
 					commande_geree=1;
 					break;
-//				case 'A' : /********** RA sens:valeur - Rotation de la base roulante d'un angle donné **********/
-//					out_M1.Angle=0;
-//					commande_geree=1;
-//					break;
+				case 'A' : /********** RA sens:valeur - Rotation de la base roulante d'un angle donné **********/
+					out_M1.Angle=atoi(&trame[5]);
+					if(trame[3]=='D'){
+						out_M1.Etat_Mouvement=Rot_AngD;
+						commande_geree=1;
+					}
+					else{
+						if(trame[3]=='G'){
+							out_M1.Etat_Mouvement=Rot_AngG;
+							commande_geree=1;
+						}
+						else{
+							out_M1.Angle=0;
+							commande_geree=0;
+						}
+					}
+					break;
 				case 'C' : /********** RC [D/G] - Rotation complète de la base roulante de 180° **********/
 					switch(trame[3]) {
 						case 'D' :
