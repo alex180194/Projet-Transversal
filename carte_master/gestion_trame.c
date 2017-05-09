@@ -70,10 +70,14 @@ void gestion_trame() {
 
 char switch_trame(void){
 	char commande_geree=0;
+	char epr=0;
 	switch(trame[0]) {
 			case 'D' : /********** D [type_épreuve] - Début de l'épreuve **********/
-			out_M1.Etat_Epreuve=decodeur_type_epreuve(&trame[2]);
-			commande_geree=1;
+			epr=atoi(&trame[2]);
+			if(epr>=epreuve1&&epr<=epreuve8){
+				out_M1.Etat_Epreuve=epr;
+				commande_geree=1;
+			}
 			break;
 
 		case 'E' : /********** E - Fin de l'épreuve **********/
@@ -140,7 +144,7 @@ char switch_trame(void){
 
 		case 'S' :
 			switch(trame[1]) {
-				case ' ' : /********** S - STOP - Fin des commandes de déplacement A et B de la base roulante **********/
+				case 0 : /********** S - STOP - Fin des commandes de déplacement A et B de la base roulante **********/
 					out_M1.Etat_Mouvement=Stopper;
 					commande_geree=1;
 					break;
@@ -315,38 +319,3 @@ char switch_trame(void){
 		return commande_geree;
 }
 
-enum Epreuve decodeur_type_epreuve(char* str){
-	char c= atoi(str);
-	switch(c){
-		case 0:
-			return Epreuve_non;
-		break;
-		case 1:
-			return epreuve1;
-		break;
-		case 2:
-			return epreuve2;
-		break;
-		case 3:
-			return epreuve3;
-		break;
-		case 4:
-			return epreuve4;
-		break;
-		case 5:
-			return epreuve5;
-		break;
-		case 6:
-			return epreuve6;
-		break;
-		case 7:
-			return epreuve7;
-		break;
-		case 8:
-			return epreuve8;
-		break;
-		default:
-			return Epreuve_non;
-		break;
-	}
-}

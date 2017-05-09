@@ -32,9 +32,13 @@ void ISR_UART1(void) interrupt 20{
 	if(SCON1&0x02){
 		if(out_buf_UART1.nbr_car>0){
 			car=io_buffer_pop_front_ISR1(&out_buf_UART1);
-			SBUF1=car;
+			if(car!=0){
+				SBUF1=car;
+				SCON1&=~0x02;
+			}
 		}
-		SCON1&=~0x02;
+		else
+			SCON1&=~0x02;
 	}
 	else{
 		if(SCON1&0x01){
