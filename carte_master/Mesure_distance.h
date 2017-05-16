@@ -7,5 +7,6 @@ float MES_AV_AR(int dir);
 unsigned int ACQ_ADC(void);
 float MES_Dist_AV(void);
 float MES_Dist_AR(void);
+void Gestion_Vitesse(void);
 
 #endif
