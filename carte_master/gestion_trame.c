@@ -36,7 +36,7 @@ void commande_init(OUT_M1* out_M1) {
 	out_M1->Etat_Lumiere = Lumiere_non;
 	out_M1->Lumiere_Intensite = 0;
 	out_M1->Lumiere_Duree = 0;
-//	out_M1->Lumiere_Extinction = 0;
+	out_M1->Lumire_Extinction = 0;
 	out_M1->Lumiere_Nbre = 0;
 	out_M1->Etat_Servo = Servo_non;
 	out_M1->Servo_Angle=0;
@@ -286,21 +286,21 @@ char switch_trame(void){
 //					break;
 //			}
 
-//		case 'L' :
-//			switch(trame[1]) {
-//				case ' ' : /********** L [I:Intensité] [D:Durée] [E:Durée] [N:Nombre] - Allumage du pointeur lumineux **********/
-//					while(c==0) {
-//						c=UART0_print("Allum ptr lumi");
-//					}
-//					c=0;
-//					break;
-//				case 'S' : /********** LS - Fin de l'allumage du pointeur lumineux **********/
-//					while(c==0) {
-//						c=UART0_print("Fin allum ptr lumi");
-//					}
-//					c=0;
-//					break;
-//			}
+		case 'L' :
+			switch(trame[1]) {
+				case ' ' : /********** L [I:Intensité] [D:Durée] [E:Durée] [N:Nombre] - Allumage du pointeur lumineux **********/
+					trame_pointeur_lumineux(trame);
+					commande_geree=1;
+					break;
+				case 'S' : /********** LS - Fin de l'allumage du pointeur lumineux **********/
+					out_M1.Etat_Lumiere=Eteindre;
+					commande_geree=1;
+					break;
+				case 0:
+					out_M1.Etat_Lumiere=Allumer;
+					commande_geree=1;
+				break;
+			}
 
 		case 'C' : /********** CS [H/V] [A:Angle] - Pilotage du servomoteur **********/
 			switch(trame[3]) {
@@ -308,22 +308,30 @@ char switch_trame(void){
 					out_M1.Etat_Servo=Servo_H;
 					if(trame[5]!=0)
 						out_M1.Servo_Angle=atoi(&trame[5]);
-					commande_geree=1;
+						if(out_M1.Servo_Angle<-90||out_M1.Servo_Angle>90){
+							out_M1.Etat_Servo=Servo_non;
+							out_M1.Servo_Angle=0;
+							commande_geree=0;
+						}
+						else
+						commande_geree=1;
 					break;
 				case 'V' : /********** Pilotage du servomoteur vertical **********/
 					out_M1.Etat_Servo=Servo_V;
 					if(trame[5]!=0)
 						out_M1.Servo_Angle=atoi(&trame[5]);
-					commande_geree=1;
+					if(out_M1.Servo_Angle<-90||out_M1.Servo_Angle>90){
+							out_M1.Etat_Servo=Servo_non;
+							out_M1.Servo_Angle=0;
+							commande_geree=0;
+						}
+						else
+						commande_geree=1;
 					break;
 					default:
-						if(trame[3]!=0){
-							out_M1.Servo_Angle=atoi(&trame[3]);
-							commande_geree=1;
-						}
+							commande_geree=0;
 					break;
 			}
-			commande_geree=1;
 			break;
 			default:
 			commande_geree=0;
@@ -332,3 +340,38 @@ char switch_trame(void){
 		return commande_geree;
 }
 
+void trame_pointeur_lumineux(char* str){
+	char i=0,j=0,i_precedent=0;
+	unsigned char val=0;
+	char s[4];
+	while(str[i]!=0){
+		if(str[i]==':'){
+			i_precedent=i;
+			i++;
+			while(str[i]!=' '&&str[i]!=0){
+				s[j]=str[i];
+				i++;
+				j++;
+			}
+			s[j]=0;
+			j=0;
+			val=(unsigned char)atoi(s);
+			switch(str[i_precedent-1]){
+				case 'I':
+					out_M1.Lumiere_Intensite=val;
+				break;
+				case 'D':
+					out_M1.Lumiere_Duree=val;
+				break;
+				case 'E':
+					out_M1.Lumire_Extinction=val;
+				break;
+				case 'N':
+					out_M1.Lumiere_Nbre=val;
+				break;
+			}
+		}
+		i++;
+	}
+	out_M1.Etat_Lumiere=Allumer;
+}
