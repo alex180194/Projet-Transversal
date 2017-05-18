@@ -3,14 +3,17 @@
 #include "PCA.h"
 
 void gestion_servos(void){
+	float fangle;
 	unsigned int angle;
 	if(out_M1.Etat_Servo==Servo_H){
-		angle=(unsigned int) 0xffff-(600+10*(out_M1.Servo_Angle+90)*22)/4;
+		fangle=65535.0f-(600.0f+10.0f*(out_M1.Servo_Angle+90.0f))*65535.0f/750000.0f;
+		angle=(unsigned int) fangle;
 		PCA(cervoH,angle);
 	}
 	else{
 		if(out_M1.Etat_Servo==Servo_V){
-			angle=(unsigned int) 0xffff-(600+10*(out_M1.Servo_Angle+90)*22)/4;
+			fangle=65535.0f-(600.0f+10.0f*(out_M1.Servo_Angle+90.0f))*65535.0f/750000.0f;
+			angle=(unsigned int) fangle;
 			PCA(cervoV,angle);
 		}
 	}

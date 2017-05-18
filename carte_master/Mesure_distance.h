@@ -1,11 +1,12 @@
 #ifndef Mesure_distance_H_
 #define Mesure_distance_H_
 
-void CFG_VREF(void);
-void CFG_ADC0(void);
-float MES_AV_AR(int dir);
-unsigned int ACQ_ADC(void);
-float MES_Dist_AV(void);
+void configure_VREF(void);
+void configure_ADC0(void);
+float mesure_avant_arriere(int dir);
+void acquisition_ADC0(void);
+void gestion_telemeres(void);
+float mesure_distance_avant(void);
 float MES_Dist_AR(void);
 void Gestion_Vitesse(void);
 
